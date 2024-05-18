@@ -3,28 +3,32 @@ import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Providers/AuthProvider";
 import { updateProfile } from "firebase/auth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
   const{createuser} = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const onSubmit = (data) => {
     console.log(data);
     createuser(data.email,data.password)
     .then(result=>{
+        reset();
         const loggedUser = result.user;
         console.log(loggedUser)
         updateProfile(loggedUser,{
-            displayName:data.name
+            displayName:data.name,
+            photoURL:data.photo
         })
         .then(()=>{
-
+            navigate('/')
         }).catch(error=>{
             console.log(error)
         })
@@ -63,6 +67,21 @@ const Signup = () => {
               />
               {errors.name && (
                 <span className="text-red-400">Name is required</span>
+              )}
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Photo URL</span>
+              </label>
+              <input
+                type="text"
+                {...register("photo", { required: true })}
+                name="photo"
+                placeholder="Your photo url link"
+                className="input input-bordered"
+              />
+              {errors.photo && (
+                <span className="text-red-400">Photo URL is required</span>
               )}
             </div>
             <div className="form-control">
