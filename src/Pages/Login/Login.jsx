@@ -7,32 +7,44 @@ import {
 import { AuthContext } from "../../Providers/AuthProvider";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import SocialLogin from "../../Components/SocialLogin/SocialLogin";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const { signIn } = useContext(AuthContext);
   const [disabled, setDisabled] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+
   const from = location.state?.from?.pathname || "/";
+  console.log("state in the location login page", location.state);
 
   useEffect(() => {
     loadCaptchaEnginge(6);
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // console.log('submit')
-    const form = e.target;
+  const handleSubmit = event => {
+    event.preventDefault();
+    const form = event.target;
     const email = form.email.value;
     const password = form.password.value;
-    const submit = { email, password };
-    console.log(submit);
-    signIn(email, password).then((result) => {
-      const user = result.user;
-      console.log(user);
-      navigate(from, {replace:true})
-    });
-  };
+    console.log(email, password);
+    signIn(email, password)
+        .then(result => {
+            const user = result.user;
+            console.log(user);
+            Swal.fire({
+                title: 'User Login Successful.',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+            navigate(from, { replace: true });
+        })
+}
   const handleValidateCaptcha = (e) => {
     const user_captcha_value = e.target.value;
     console.log(user_captcha_value);
@@ -46,11 +58,9 @@ const Login = () => {
   };
   return (
     <>
-    <Helmet>
-        <title>
-            Bistro Boss | Login
-        </title>
-    </Helmet>
+      <Helmet>
+        <title>Bistro Boss | Login</title>
+      </Helmet>
       <div className="hero min-h-screen bg-base-200">
         <div className="hero-content flex-col md:flex-row lg:flex-row">
           <div className="text-center w-1/2 lg:text-left">
@@ -93,7 +103,7 @@ const Login = () => {
                   <span className="label-text">Password</span>
                 </label>
                 <input
-                onBlur={handleValidateCaptcha}
+                  onBlur={handleValidateCaptcha}
                   type="text"
                   name="captha"
                   placeholder="type the text above"
@@ -115,6 +125,7 @@ const Login = () => {
                 New Here? <Link to="/signup">Create an account</Link>
               </small>
             </p>
+            <SocialLogin></SocialLogin>
           </div>
         </div>
       </div>

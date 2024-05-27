@@ -4,8 +4,14 @@ import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Providers/AuthProvider";
 import { updateProfile } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
+import useAxiosPublic from "../../Hooks/useAxiosPublic";
+import toast from "react-hot-toast";
+import SocialLogin from "../../Components/SocialLogin/SocialLogin";
 
 const Signup = () => {
+
+  const axiosPublic = useAxiosPublic();
+
   const {
     register,
     handleSubmit,
@@ -20,7 +26,20 @@ const Signup = () => {
     console.log(data);
     createuser(data.email,data.password)
     .then(result=>{
-        reset();
+      // create user entry in the database
+      const userInfo = {
+        name: data.name,
+        email: data.email,
+        password : data.password
+      }
+      axiosPublic.post('/users',userInfo)
+      .then(res=>{
+        if(res.data.insertedId){
+          reset();
+          toast.success('User Create Successfully!')
+        }
+      })
+
         const loggedUser = result.user;
         console.log(loggedUser)
         updateProfile(loggedUser,{
@@ -45,7 +64,7 @@ const Signup = () => {
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content flex-col lg:flex-row-reverse">
         <div className="text-center lg:text-left">
-          <h1 className="text-5xl font-bold">Login now!</h1>
+          <h1 className="text-5xl font-bold">SignUp now!</h1>
           <p className="py-6">
             Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
             excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
@@ -132,7 +151,8 @@ const Signup = () => {
                 <input className="btn btn-primary" type="submit" value="Signup" />
             </div>
           </form>
-          <p>Already have an account? <Link to="/login">Login</Link></p>
+          <p className="px-6">Already have an account? <Link to="/login">Login</Link></p>
+          <SocialLogin></SocialLogin>
         </div>
       </div>
     </div>
